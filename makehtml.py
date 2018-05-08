@@ -3,6 +3,8 @@
 
 import argparse
 import csv
+import numpy as np
+import pandas as pd
 import sys
 import os.path
 
@@ -12,15 +14,22 @@ backgroundcoloring = 0
 letters = 'ABCDEFGH'
 
 
-def main(infile, outfile, headerfile):
+def main(values_df, outfile, headerfile):
+	"""Main function.
+
+	Args:
+		values_df: values to output in HTML as a Pandas DataFrame.
+		outfile: output file object.
+		headerfile: JS header content file object.
+	"""
 	# write beginning of header
 	outfile.write('<script language="JavaScript">\n<!--\n')
 
 	# Find the order from lowest to highest
 	values = []
-	for r, row in enumerate(csv.reader(infile)):
-		for c, element in enumerate(row):
-			values.append(float(element))
+	for idx, row in values_df.iterrows():
+		for v in row.values:
+			values.append(v)
 	wellorder = [i[0] for i in sorted(enumerate(values), key=lambda x:x[1])]
 
 	# Record order as a variable which javascript will interact with
@@ -43,10 +52,10 @@ def main(infile, outfile, headerfile):
 
 	# make rest of table table
 	k = 0
-	for r in range(0,8):
+	for r in range(0, 8):
 		outfile.write('<tr valign="top">\n')
 		outfile.write('<td class = "row-label" style="background-color:rgb(255,255,255)" > %s   </td>\n'%(letters[r]))
-		for c in range(0,12):
+		for c in range(0, 12):
 			value = values[k]
 			order = wellorder.index(k)
 			if backgroundcoloring==1:
@@ -73,15 +82,15 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
 		description='Make an HTML file for dilutions.')
 	parser.add_argument(
-		'--header_fname', default='header.html',
+		'--header_file', default='header.html',
 		type=argparse.FileType('rU'),
 		help='Path to HTML header template file.')
 	parser.add_argument(
-		'--out_fname', default='index.html',
+		'--out_file', default='index.html',
 		type=argparse.FileType('w'),
 		help='Output HTML template file.')
 	parser.add_argument(
-		'--amounts_fname', default='volumes.csv',
+		'--amounts_file', default='volumes.csv',
 		type=argparse.FileType('rU'),
 		help='Path to amounts CSV file.')
 	parser.add_argument(
@@ -99,6 +108,6 @@ if __name__ == '__main__':
 	# TODO(flamholz): fix JS so that highest value is highlighted on
 	# start in Chrome.
 	# TODO(flamholz): make script calculate dilutions.
-	# TODO(flamholz): convert amounts to pandas DataFrame - simpler.
 	# TODO(flamholz): use a Jinja template to simplify output?
-	main(args.amounts_fname, args.out_fname, args.header_fname)
+	values_df = pd.read_csv(args.amounts_file, names=np.arange(1, 13))
+	main(values_df, args.out_file, args.header_file)
