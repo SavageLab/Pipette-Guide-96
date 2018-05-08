@@ -30,7 +30,7 @@ def calc_vols2add(values_df, final_conc, sample_volume):
 	"""
 	total_amts = values_df * sample_volume
 	vols_to_add = (total_amts - (sample_volume * final_conc)) / final_conc
-	
+
 	vols_to_add[values_df == 0] = 0.0
 	vols_to_add[vols_to_add <= 0] = 0.0
 	return vols_to_add
@@ -129,7 +129,6 @@ if __name__ == '__main__':
 
 	# TODO(flamholz): fix JS so that highest value is highlighted on
 	# start in Chrome.
-	# TODO(flamholz): make script calculate dilutions.
 	# TODO(flamholz): use a Jinja template to simplify output?
 	values_df = pd.read_csv(args.amounts_file, names=np.arange(1, 13))
 	if args.final_conc and args.sample_volume:
