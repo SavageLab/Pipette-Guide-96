@@ -14,6 +14,28 @@ backgroundcoloring = 0
 letters = 'ABCDEFGH'
 
 
+def calc_vols2add(values_df, final_conc, sample_volume):
+	"""Calculates a new values DataFrame with the volumes to add.
+	
+	Assumes values are concentrations all in the same volume and
+	final_conc is in the same units.
+
+	Args:
+		values_df: DataFrame containing concentrations.
+		volume: volume, must be the same for all wells.
+		final_conc: desired final concentration.
+
+	Returns:
+		A new data frame with volumes to add.
+	"""
+	total_amts = values_df * sample_volume
+	total_vols = final_conc * total_amts
+	vols_to_add = total_vols - sample_volume
+
+	vols_to_add[values_df == 0] = 0.0
+	return vols_to_add
+
+
 def main(values_df, outfile, headerfile):
 	"""Main function.
 
@@ -110,4 +132,8 @@ if __name__ == '__main__':
 	# TODO(flamholz): make script calculate dilutions.
 	# TODO(flamholz): use a Jinja template to simplify output?
 	values_df = pd.read_csv(args.amounts_file, names=np.arange(1, 13))
+	if args.final_conc and args.sample_volume:
+		values_df = calc_vols2add(
+			values_df, args.final_conc, args.sample_volume)
+
 	main(values_df, args.out_file, args.header_file)
