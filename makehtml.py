@@ -29,10 +29,10 @@ def calc_vols2add(values_df, final_conc, sample_volume):
 		A new data frame with volumes to add.
 	"""
 	total_amts = values_df * sample_volume
-	total_vols = final_conc * total_amts
-	vols_to_add = total_vols - sample_volume
-
+	vols_to_add = (total_amts - (sample_volume * final_conc)) / final_conc
+	
 	vols_to_add[values_df == 0] = 0.0
+	vols_to_add[vols_to_add <= 0] = 0.0
 	return vols_to_add
 
 
